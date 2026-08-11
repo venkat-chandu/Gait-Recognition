@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.venv/
+data/synthetic/*.npz
+models_artifacts/*.keras
+outputs/*.png
+outputs/*.json
+uploads/
