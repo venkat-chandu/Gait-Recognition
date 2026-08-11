@@ -12,6 +12,21 @@ This educational computer-vision project identifies an enrolled class from a wal
 
 Human gait is a behavioral biometric signal that can be studied without relying on facial appearance. This project investigates whether pose-derived skeletal features can represent spatial body relationships and temporal walking patterns for closed-set identity classification.
 
+## Research Contribution
+
+The project investigates a pose-based representation for gait recognition by combining spatial and temporal deep-learning methods.
+
+The main technical components are:
+
+- Human-pose-based gait representation using 33 MediaPipe landmarks
+- Hip-centered and torso-scale normalization
+- Fixed-length temporal sequence construction
+- Conv1D layers for spatial joint-feature representation
+- LSTM for temporal movement modeling
+- Closed-set identity classification
+- Quantitative evaluation using precision, recall, F1-score and confusion matrices
+- Interactive visualization through Streamlit
+
 ## 3. System Architecture
 
 `Walking video -> OpenCV -> MediaPipe Pose (33 landmarks) -> normalization -> 30-frame sequence -> Conv1D -> LSTM -> softmax class scores -> predicted class`
@@ -25,7 +40,7 @@ Human gait is a behavioral biometric signal that can be studied without relying 
 | MediaPipe Pose | 33 body-landmark extraction |
 | NumPy | Sequence processing |
 | TensorFlow/Keras | CNN-LSTM model |
-| scikit-learn | Data split and metrics |
+| scikit-learn | Data splitting and evaluation metrics |
 | Matplotlib / Seaborn | Training and evaluation figures |
 | Streamlit | Interactive web interface |
 
@@ -47,17 +62,19 @@ MediaPipe Pose processes each RGB frame and returns 33 landmark coordinates. A s
 
 | Component | Configuration |
 |---|---|
-| Input | 30 frames x 99 pose features |
-| Spatial feature encoder | Conv1D (64) -> MaxPooling -> Conv1D (96) |
+| Input | 30 frames × 99 pose features |
+| Spatial feature encoder | Conv1D (64) → MaxPooling → Conv1D (96) |
 | Regularization | Dropout (0.25) |
 | Temporal encoder | LSTM (64) |
-| Classifier | Dropout (0.30) -> Dense softmax |
+| Classifier | Dropout (0.30) → Dense softmax |
 
 The Conv1D layers learn local feature relationships while the LSTM models their movement over time.
 
 ## 9. Training Methodology
 
-The synthetic dataset uses stratified **sequence-level** train/validation/test splits of 56%/14%/30%. Early stopping monitors validation loss and restores the best model weights.
+The demonstration uses sequence-level stratified splitting. Because the same enrolled identities may occur across the splits, the resulting evaluation measures closed-set classification performance rather than generalization to previously unseen subjects.
+
+Early stopping monitors validation loss and restores the best model weights.
 
 This is a closed-set identity classifier: every predicted identity must appear in training. Therefore this demonstration does **not** claim subject-disjoint or unseen-person generalization.
 
@@ -67,7 +84,7 @@ The evaluation script reports held-out accuracy, per-class precision, recall, F1
 
 ## 11. Experimental Results
 
-The repository includes a lightweight synthetic demonstration dataset and a trained baseline model artifact. After running the training and evaluation commands, the outputs folder contains metrics and plots that summarize performance on the held-out split.
+The repository includes a lightweight synthetic demonstration dataset and provides scripts to train and evaluate the baseline model. After running the training and evaluation commands, the outputs folder contains metrics and plots that summarize performance on the held-out split.
 
 The current demo is intended for reproducibility and educational inspection rather than claiming real-world biometric accuracy.
 
