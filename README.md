@@ -2,30 +2,6 @@
 
 This repository presents an educational pose-based gait recognition pipeline that uses MediaPipe landmarks and a CNN-LSTM classifier to classify walking sequences from short videos.
 
-## Table of Contents
-
-1. [Project Overview](#1-project-overview)
-2. [Motivation](#2-motivation)
-3. [System Architecture](#3-system-architecture)
-4. [Technologies](#4-technologies)
-5. [Dataset](#5-dataset)
-6. [Data Preprocessing](#6-data-preprocessing)
-7. [MediaPipe Pose Extraction](#7-mediapipe-pose-extraction)
-8. [CNN-LSTM Architecture](#8-cnn-lstm-architecture)
-9. [Training Methodology](#9-training-methodology)
-10. [Evaluation Metrics](#10-evaluation-metrics)
-11. [Experimental Results](#11-experimental-results)
-12. [Confusion Matrix](#12-confusion-matrix)
-13. [Training Curves](#13-training-curves)
-14. [Streamlit Demo](#14-streamlit-demo)
-15. [Installation](#15-installation)
-16. [Usage](#16-usage)
-17. [Project Structure](#17-project-structure)
-18. [Limitations](#18-limitations)
-19. [Ethical Considerations](#19-ethical-considerations)
-20. [Future Work](#20-future-work)
-21. [License](#21-license)
-
 ## 1. Project Overview
 
 This educational computer-vision project identifies an enrolled class from a walking video. It converts video frames into MediaPipe Pose landmarks, normalizes the skeletal representation, constructs a 30-frame sequence, and applies a CNN-LSTM classifier.
