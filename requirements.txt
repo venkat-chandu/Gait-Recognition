@@ -6,4 +6,8 @@ matplotlib>=3.7
 seaborn>=0.13
 streamlit>=1.32
 opencv-python>=4.8
-mediapipe>=0.10
+# The project uses the stable ``mp.solutions.pose`` API, removed in MediaPipe 1.0.
+mediapipe>=0.10,<1.0
+streamlit-webrtc>=0.62
+av>=12
+pytest>=8

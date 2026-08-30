@@ -11,20 +11,18 @@ def _resample(sequence: np.ndarray, sequence_length: int) -> np.ndarray:
     positions = np.linspace(0, len(sequence) - 1, sequence_length).round().astype(int)
     return sequence[positions]
 
-
+``
 def video_to_sequence(video_path: str | Path, sequence_length: int = 30) -> tuple[np.ndarray, np.ndarray | None]:
     """Extract pose frames and resample them to ``(sequence_length, 99)``.
 
     Raises a helpful error when too few frames contain a detectable person.
     """
-    import mediapipe as mp
-
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         raise ValueError("Could not open the uploaded video.")
     frames, preview = [], None
-    with mp.solutions.pose.Pose(static_image_mode=False, model_complexity=1,
-                                min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
+    from .pose_extractor import PoseDetector
+    with PoseDetector() as pose:
         while True:
             ok, bgr = cap.read()
             if not ok:

@@ -12,7 +12,7 @@ def main() -> None:
     import tensorflow as tf
     test = np.load("outputs/test_split.npz", allow_pickle=False)
     x, y, names = test["X"], test["y"], test["class_names"].tolist()
-    model = tf.keras.models.load_model("models_artifacts/gait_model.keras")
+    model = tf.keras.models.load_model("models_artifacts/gait_model.h5", compile=False)
     predicted = model.predict(x, verbose=0).argmax(axis=1)
     report = classification_report(y, predicted, target_names=names, output_dict=True, zero_division=0)
     report["accuracy"] = accuracy_score(y, predicted)

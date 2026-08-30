@@ -3,6 +3,9 @@ __pycache__/
 .venv/
 data/synthetic/*.npz
 models_artifacts/*.keras
+models_artifacts/*.h5
+models_artifacts/*.task
 outputs/*.png
 outputs/*.json
+outputs/*.log
 uploads/

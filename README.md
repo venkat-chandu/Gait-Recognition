@@ -1,122 +1,53 @@
-# Deep Learning-Based Gait Recognition Using CNN-LSTM and Human Pose Estimation
+# Real-Time Pose-Based Gait Recognition
 
-This repository presents an educational pose-based gait recognition pipeline that uses MediaPipe landmarks and a CNN-LSTM classifier to classify walking sequences from short videos.
+An educational computer-vision project for closed-set gait classification from pose sequences. It supports recorded-video analysis and a live browser-camera dashboard with multi-person tracking, target selection, movement estimates, and robotics-ready target state.
 
-## 1. Project Overview
+> The included data is synthetic. This project is for education and consented research only; it is not a real-world biometric identification, surveillance, authentication, clinical, or safety-critical system.
 
-This educational computer-vision project identifies an enrolled class from a walking video. It converts video frames into MediaPipe Pose landmarks, normalizes the skeletal representation, constructs a 30-frame sequence, and applies a CNN-LSTM classifier.
+## Features
 
-> **Demonstration only:** the included dataset is synthetic. Its results are not real-world biometric-identification results and must not be presented as such.
+- MediaPipe Pose extraction with 33 body landmarks
+- Hip-centred, torso-scale skeletal normalization
+- Fixed 30-frame gait sequences and CNN-LSTM recognition
+- Live browser camera and recorded-video workflows
+- OpenCV person detection and persistent tracking IDs
+- Independent pose buffers and predictions for multiple people
+- Configurable low-confidence `UNKNOWN` state
+- Target-person selection and highlighted target tracking
+- Image-space position, direction, and walking-speed estimates
+- Gait-cycle estimates: cadence, cycle duration, ankle-separation peaks
+- Detection/pose timing, FPS, and memory monitoring
+- Training augmentation: small rotations, scaling, noise, and temporal jitter
+- CNN-only, LSTM-only, and CNN-LSTM comparison experiment
+- Controlled robustness evaluation
+- Image-to-ground-plane calibration helper for configured cameras
 
-## 2. Motivation
+## Architecture
 
-Human gait is a behavioral biometric signal that can be studied without relying on facial appearance. This project investigates whether pose-derived skeletal features can represent spatial body relationships and temporal walking patterns for closed-set identity classification.
+```text
+Camera or video
+  -> Person detection
+  -> Persistent tracking IDs
+  -> MediaPipe Pose (33 landmarks per person)
+  -> Normalization
+  -> Per-person 30-frame buffer
+  -> CNN / LSTM / CNN-LSTM classification
+  -> Known identity or UNKNOWN
+  -> Target state for robotics integration
+```
 
-## Research Contribution
+The live baseline uses OpenCV's CPU HOG person detector and a centroid/IoU tracker. It is lightweight and useful for a demonstration, but it can miss people or switch IDs during crossings and long occlusions. Use a validated detector and tracker before deployment.
 
-The project investigates a pose-based representation for gait recognition by combining spatial and temporal deep-learning methods.
-
-The main technical components are:
-
-- Human-pose-based gait representation using 33 MediaPipe landmarks
-- Hip-centered and torso-scale normalization
-- Fixed-length temporal sequence construction
-- Conv1D layers for spatial joint-feature representation
-- LSTM for temporal movement modeling
-- Closed-set identity classification
-- Quantitative evaluation using precision, recall, F1-score and confusion matrices
-- Interactive visualization through Streamlit
-
-## 3. System Architecture
-
-`Walking video -> OpenCV -> MediaPipe Pose (33 landmarks) -> normalization -> 30-frame sequence -> Conv1D -> LSTM -> softmax class scores -> predicted class`
-
-## 4. Technologies
-
-| Technology | Purpose |
-|---|---|
-| Python | Application and model code |
-| OpenCV | Video decoding and frame processing |
-| MediaPipe Pose | 33 body-landmark extraction |
-| NumPy | Sequence processing |
-| TensorFlow/Keras | CNN-LSTM model |
-| scikit-learn | Data splitting and evaluation metrics |
-| Matplotlib / Seaborn | Training and evaluation figures |
-| Streamlit | Interactive web interface |
-
-## 5. Dataset
-
-The included generator creates a synthetic demonstration dataset with 4 classes, 20 sequences per class, 30 frames per sequence, and 99 features per frame (33 landmarks x x/y/z). It supports a clone-install-generate-train-evaluate workflow without a private video dataset.
-
-For research with real data, document the dataset source, license, subjects, sequences, preprocessing, and split protocol. Do not equate synthetic results with real-world generalization.
-
-## 6. Data Preprocessing
-
-Each detected frame is represented by 33 xyz landmarks. Landmarks are translated so the hip midpoint becomes the origin and scaled by torso length (hip center to shoulder center). Valid pose frames are uniformly resampled to a fixed 30-frame sequence.
-
-## 7. MediaPipe Pose Extraction
-
-MediaPipe Pose processes each RGB frame and returns 33 landmark coordinates. A sequence is accepted only when at least two frames have a detectable pose. The Streamlit app displays the final annotated pose frame to make extraction visible.
-
-## 8. CNN-LSTM Architecture
-
-| Component | Configuration |
-|---|---|
-| Input | 30 frames × 99 pose features |
-| Spatial feature encoder | Conv1D (64) → MaxPooling → Conv1D (96) |
-| Regularization | Dropout (0.25) |
-| Temporal encoder | LSTM (64) |
-| Classifier | Dropout (0.30) → Dense softmax |
-
-The Conv1D layers learn local feature relationships while the LSTM models their movement over time.
-
-## 9. Training Methodology
-
-The demonstration uses sequence-level stratified splitting. Because the same enrolled identities may occur across the splits, the resulting evaluation measures closed-set classification performance rather than generalization to previously unseen subjects.
-
-Early stopping monitors validation loss and restores the best model weights.
-
-This is a closed-set identity classifier: every predicted identity must appear in training. Therefore this demonstration does **not** claim subject-disjoint or unseen-person generalization.
-
-## 10. Evaluation Metrics
-
-The evaluation script reports held-out accuracy, per-class precision, recall, F1 score, and a confusion matrix. It writes structured results to `outputs/metrics.json`.
-
-## 11. Experimental Results
-
-The repository includes a lightweight synthetic demonstration dataset and provides scripts to train and evaluate the baseline model. After running the training and evaluation commands, the outputs folder contains metrics and plots that summarize performance on the held-out split.
-
-The current demo is intended for reproducibility and educational inspection rather than claiming real-world biometric accuracy.
-
-| Model | Accuracy | Precision | Recall | F1 |
-|---|---:|---:|---:|---:|
-| CNN-LSTM | Pending evaluation | Pending evaluation | Pending evaluation | Pending evaluation |
-
-## 12. Confusion Matrix
-
-After evaluation, the script writes a confusion matrix to `outputs/confusion_matrix.png`. This figure shows which enrolled classes are most often confused by the model on the held-out synthetic sequences.
-
-## 13. Training Curves
-
-Training produces `outputs/accuracy_curve.png` and `outputs/loss_curve.png`. These plots help inspect convergence and possible overfitting during the demonstration run.
-
-## 14. Streamlit Demo
-
-The app is served at `http://localhost:8501`. Upload a clear, single-person walking video and select **Analyze gait**. The app shows the predicted enrolled class, its softmax model score, class-score chart, and a detected pose frame.
-
-Softmax scores are not calibrated confidence estimates. Predictions for identities absent from training are not meaningful.
-
-## 15. Installation
+## Installation
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+python -m scripts.download_pose_model
 ```
 
-If TensorFlow is not already installed, the dependency list in `requirements.txt` will install it for the environment used by this project.
-
-## 16. Usage
+## Quick start
 
 ```powershell
 python -m scripts.generate_synthetic_data
@@ -125,38 +56,130 @@ python -m evaluation.evaluate
 streamlit run app.py
 ```
 
-## 17. Project Structure
+Open the local address printed by Streamlit, choose **Live camera** or **Recorded video**, and grant browser camera permission for the live workflow.
+
+`scripts.download_pose_model` retrieves the official lightweight MediaPipe Pose Landmarker asset required by the current MediaPipe Tasks API. It is not stored in Git.
+
+## Live dashboard
+
+The live workflow shows each tracked person’s ID, gait class, confidence, movement direction, image-space speed, FPS, detection time, pose time, and memory use.
+
+Set a tracking ID as the target. The selected person is highlighted in green. The target state is structured as:
 
 ```text
-app.py                          Streamlit demo interface
-preprocessing/                 video processing, pose extraction, and normalization
-models/cnn_lstm.py             CNN-LSTM model definition
-scripts/generate_synthetic_data.py
-training/train.py              training pipeline and artifact export
-evaluation/                    evaluation metrics and visualization
-models_artifacts/              saved model and class label mapping
-outputs/                       metrics, confusion matrix, and training plots
-tests/                         unit tests for preprocessing utilities
+id: person_02
+gait: Person 2 | UNKNOWN
+confidence: 0.94
+position: [423, 287]
+direction: RIGHT
+speed_px_s: 82.4
+tracking: true
+gait_cycle: { cadence_steps_min, cycle_duration_s, ... }
 ```
 
-## 18. Limitations
+`position` and `speed_px_s` are image-space quantities. A calibrated camera homography or depth sensor is required before interpreting them as metres or metres/second.
 
-- Synthetic samples do not represent real gait variation.
-- Pose extraction can fail with occlusion, poor video quality, unusual camera angles, or multiple people.
-- Gait may change with clothing, shoes, carried objects, injury, speed, and environment.
-- This closed-set classifier is not an open-set identity or authentication system.
+## Training and evaluation
 
-## 19. Ethical Considerations
+The synthetic generator produces four classes, 20 sequences per class, 30 frames per sequence, and 99 features per frame (33 landmarks × xyz coordinates).
 
-Gait is biometric information. Use this project only for education and research with informed consent, data minimization, privacy safeguards, fairness assessment, and compliance with applicable law. It is not intended for surveillance or standalone security decisions.
+Train with augmentation applied only to the training partition:
 
-## 20. Future Work
+```powershell
+python -m training.train --epochs 35 --augment-copies 1
+```
 
-- Evaluate on consented real-world datasets with documented subject-level protocols.
-- Compare classical, CNN-only, LSTM-only, and CNN-LSTM baselines.
-- Study cross-view robustness, occlusion handling, and open-set recognition.
-- Explore graph neural networks and transformer-based temporal models.
+Evaluate the saved CNN-LSTM model:
 
-## 21. License
+```powershell
+python -m evaluation.evaluate
+```
+
+This writes held-out accuracy, per-class precision/recall/F1, a confusion matrix, and training curves into `outputs/`.
+
+Compare model architectures:
+
+```powershell
+python -m evaluation.compare_models --epochs 20 --augment-copies 1
+```
+
+This saves CNN-only, LSTM-only, and CNN-LSTM accuracy, weighted precision/recall/F1, and average inference time to `outputs/model_comparison.json`.
+
+Run controlled robustness checks:
+
+```powershell
+python -m evaluation.robustness
+```
+
+The robustness script measures the held-out model under small pose noise and temporal jitter. It does not replace real-world testing across lighting, clothing, cameras, backgrounds, occlusion, distance, and walking direction.
+
+## Calibration and real-world data
+
+`preprocessing/calibration.py` converts a pixel point to a ground-plane coordinate using a supplied 3×3 camera homography. Calibrate and validate the camera in the actual environment before producing physical coordinates or walking speeds.
+
+For real-world evaluation, use only consented data. Document dataset source and licence, participant consent, camera setup, sequences, lighting, clothing, speeds, distances, occlusion, retention, and split protocol. Use subject-disjoint splits when measuring generalization to previously unseen people.
+
+## Project boundary: robotics-ready, not robotics
+
+This project ends at the perception boundary. It produces person identity/status, tracking, image-space position, direction, speed, and gait-cycle estimates for a selected target. It does **not** contain a robot, ROS 2 nodes, mapping, localization, route/path planning, obstacle avoidance, motor control, or robot simulation.
+
+```text
+This project: camera -> perception -> robotics-ready target state
+
+Future robotics project: target state -> ROS 2 -> planner -> obstacle avoidance
+                       -> robot controller -> simulated or physical robot
+```
+
+Keep the future robotics integration as a separate project with its own safety requirements, interfaces, simulation tests, and deployment validation.
+
+## Validation and freeze checklist
+
+The repository is ready to freeze as an educational gait-perception baseline after completing the following checks for the intended release:
+
+- `python -m pytest tests -q` passes.
+- Synthetic data generation, training, evaluation, robustness, and model-comparison commands run successfully.
+- The Streamlit dashboard opens and both tabs render.
+- A consented camera/video test confirms expected behaviour for detection, tracking IDs, target highlighting, `UNKNOWN` thresholding, and output overlays.
+- Results are labelled as synthetic or consented real-world results, with no unsupported biometric or robotics claims.
+- The source version, dependency versions, dataset metadata, configuration, and generated metrics are recorded.
+
+The current automated validation covers code paths and synthetic artefacts. Live-camera behaviour still requires manual validation on the machine/browser/camera used for deployment.
+
+## Tests
+
+```powershell
+python -m pytest tests -q
+```
+
+Tests cover normalization, tracking-ID persistence, unknown handling, position/movement state, augmentation, gait-cycle calculations, calibration, and performance monitoring.
+
+## Project structure
+
+```text
+app.py                          Streamlit dashboard
+preprocessing/
+  pose_extractor.py             MediaPipe pose extraction
+  video_processor.py            recorded-video sequence construction
+  normalization.py              skeletal normalization
+  realtime.py                   tracking, target state, motion
+  augmentation.py               training-only pose augmentation
+  gait_cycle.py                 exploratory gait-cycle measures
+  calibration.py                calibrated ground-plane projection
+  performance.py                timing and memory monitor
+models/cnn_lstm.py              CNN, LSTM, and CNN-LSTM definitions
+training/train.py               training and artifact export
+evaluation/                     evaluation, robustness, and comparison scripts
+tests/                          automated unit tests
+```
+
+## Limitations and ethics
+
+- Softmax scores are not calibrated confidence probabilities.
+- The model is closed-set: it only recognizes identities represented during training. The `UNKNOWN` state is threshold-based, not a true open-set biometric solution.
+- Synthetic scores must not be reported as real-world identity performance.
+- Pose quality depends on camera angle, lighting, occlusion, distance, and multiple people.
+- Gait is sensitive biometric information. Use informed consent, data minimization, privacy safeguards, fairness evaluation, and applicable legal compliance.
+
+## Licence
 
 This project is licensed under the [MIT License](LICENSE).
